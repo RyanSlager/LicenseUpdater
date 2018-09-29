@@ -1,0 +1,28 @@
+SET SERVEROUTPUT ON
+DECLARE
+PROCEDURE UPDATE_RC_ST
+  (NAICID ORG.NAIC_ID%TYPE,
+  NIPROLDLIC RC_ST.ST_CO_NBR%TYPE,
+  NEWLIC RC_ST.ST_LIC_NBR%TYPE)
+  is
+  BEGIN
+    
+      for lrec_org in(select org_id from org where org.naic_id=to_char(NAICID))
+      loop 
+        for lrec_rc_st in (select * from rc_st where rc_org_id = lrec_org.org_id and st_cd = 'AL' and st_co_nbr = NIPROLDLIC )
+        loop
+          dbms_output.put_line(lrec_rc_st.rc_org_id ||','||lrec_rc_st.st_co_nbr || ',' || lrec_rc_st.st_lic_nbr || ',' || lrec_rc_st.st_cd);
+          UPDATE rc_st SET ST_CO_NBR = NEWLIC, ST_LIC_NBR = NEWLIC where rc_org_id = lrec_org.org_id and st_cd = 'AL' and st_co_nbr = NIPROLDLIC;
+ 		end loop;
+      end loop;
+  END UPDATE_RC_ST;
+
+BEGIN
+  FOR NXT_SSCRB_REF IN (SELECT * FROM SSCRB_REF WHERE DATA_SRC IS NULL)
+    LOOP
+      UPDATE DBA_MNG_CNTXT SET CUST_ID = NXT_SSCRB_REF.SSCRB_ID WHERE USER_NAME = USER;
+      COMMIT;
+dbms_output.put_line( 'SSCRB_ID: ' || NXT_SSCRB_REF.SSCRB_ID);
+dbms_output.put_line('ST_CO_NBR,ST_LIC_NBR,ST_CD');
+ 
+Sys_Glob_Pkg.Gs_Row_Uid := 'SHARK-####';
